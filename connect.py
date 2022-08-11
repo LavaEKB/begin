@@ -9,8 +9,8 @@ params_login = {
     }
 try:
     token = requests.get("https://iiko.biz:9900/api/0/auth/access_token", params=params_login)
-except:
-    print('Ошибка запроса токена.')
+except ConnectionError:
+    print("ConnectionError")
     err = 1
 
 if err == 0 and token.status_code == 200:
@@ -35,7 +35,7 @@ if err == 0 and token.status_code == 200:
 
     #print(prods_json)
 
-    # Добавляем заказ с составным модификатором и пользователя
+    # Добавляем заказ с составным модификатором и новым покупателем
     params_order =  {
         "access_token": token_json,
         "requestTimeout": "00%3A"
@@ -83,7 +83,20 @@ if err == 0 and token.status_code == 200:
     order = requests.post('https://iiko.biz:9900/api/0/orders/add', params=params_order,json=data_order)
     order_json = order.json()
 
-    print(order_json)
+    #print(order_json)
+
+
+    # Список городов и улиц для первой организации
+    params_streets = {"access_token": token_json, "organization" : orgs_json[0]["id"]} 
+    streets = requests.get("https://iiko.biz:9900/api/0/cities/cities", params_streets)
+    streets_json = streets.json()
+
+    #with open('streets.txt', 'w', encoding='utf-8') as streets_file:
+        #print(streets_json, file=streets_file)    
+
+    # Первый город
+    print(streets_json[0]["city"]["name"])
+    
 
 else:
     print('Ошибка получения токена.')
